@@ -1,0 +1,47 @@
+clc;
+SER2=sfunc(2);
+SER4=sfunc(4);
+SER8=sfunc(8);
+SER16=sfunc(16);
+SER32=sfunc(32);
+
+
+figure;
+semilogy(SNR_dB, SER2, 'b-o', 'LineWidth', 2);
+hold on;
+semilogy(SNR_dB, SER4, 'r-o', 'LineWidth', 2);
+hold on;
+semilogy(SNR_dB, SER8, 'r--', 'LineWidth', 2);
+hold on;
+semilogy(SNR_dB, SER16, 'g-*', 'LineWidth', 2);
+hold on;
+semilogy(SNR_dB, SER32, 'o-', 'LineWidth', 2);
+grid on;
+
+title(['Symbol Error Rate vs. SNR for ', '2-PSK']);
+xlabel('SNR (dB)');
+ylabel('Symbol Error Rate (SER)');
+legend([num2str(2), '-PSK',num2str(2), '-PSK',]);
+axis([0 30 1e-5 1]);
+
+
+function y = qfunc(x)
+    y = 0.5 * erfc(x / sqrt(2));
+end
+
+function SER=sfunc(M)
+k = log2(M); % Bits per symbol
+SNR_dB = 0:2:30;
+% Pre-allocate SER array
+SER = zeros(size(SNR_dB));
+
+% Loop over SNR values
+for i = 1:length(SNR_dB)
+    SNR = 10^(SNR_dB(i)/10); % Convert SNR from dB to linear scale
+    SER(i) = 2 * qfunc(sqrt(2 * SNR * sin(pi/M))) * sin(pi/M); % SER calculation for M-PSK
+SER(i) = 2 * (M-1) / M * qfunc(sqrt(3 * log2(M) / (M^2 - 1) * SNR));
+     SER(i) = 2*(1-1/sqrt(M))*qfunc(sqrt((3*k/(M-1))*SNR));
+ SER(i) = (M - 1) * qfunc(sqrt(2 * SNR));
+ SER(i) = (M - 1) * qfunc(sqrt(SNR / (M - 1)));
+end
+end
